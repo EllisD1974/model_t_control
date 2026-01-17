@@ -41,6 +41,8 @@ class SerialPlotWidget(QtWidgets.QWidget):
         self.record_file = None
         self.csv_writer = None
 
+        self.paused = False
+
         # Timer for GUI updates
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.update_plot)
@@ -60,10 +62,17 @@ class SerialPlotWidget(QtWidgets.QWidget):
             return False
 
     def disconnect_serial(self):
+        """
+        Safely stop the serial reading thread and close the port.
+        """
         self.running = False
         if self.ser and self.ser.is_open:
-            self.ser.close()
-            self.ser = None
+            try:
+                self.ser.close()
+                print("Serial port closed.")
+            except Exception as e:
+                print("Error closing serial port:", e)
+        self.ser = None
 
     # --- Background Serial Reading ---
     def read_serial(self):
@@ -112,6 +121,8 @@ class SerialPlotWidget(QtWidgets.QWidget):
 
     # --- Update Plot ---
     def update_plot(self):
+        if self.paused:
+            return  # do not update curves when paused
         for ch in self.channels:
             self.curves[ch].setData(self.data[ch])
 
@@ -135,3 +146,12 @@ class SerialPlotWidget(QtWidgets.QWidget):
             print(f"Loaded {len(self.data[self.channels[0]])} samples from {filename}")
         except Exception as e:
             print("Failed to load CSV:", e)
+
+    def pause(self):
+        self.paused = True
+
+    def resume(self):
+        self.paused = False
+
+    def toggle_pause(self):
+        self.paused = not self.paused
