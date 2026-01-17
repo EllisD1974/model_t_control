@@ -1,23 +1,19 @@
-from PyQt5 import QtWidgets, QtCore
+# main_app_with_pause.py
+from PyQt5 import QtWidgets
 from com_selector_widget import ComSelectorWidget
 from serial_plot_widget import SerialPlotWidget
-
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Serial Plot with Persistent Connection")
+        self.setWindowTitle("Serial Plot with Pause")
         self.resize(800, 600)
 
-        # --- QSettings ---
-        self.settings = QtCore.QSettings("NEL", "SerialPlotApp")
-
-        # --- Central Widget ---
         central = QtWidgets.QWidget()
         self.setCentralWidget(central)
         main_layout = QtWidgets.QVBoxLayout(central)
 
-        # --- Top Controls: COM selector + Connect ---
+        # --- Top Controls ---
         top_layout = QtWidgets.QHBoxLayout()
         self.com_selector = ComSelectorWidget()
         top_layout.addWidget(QtWidgets.QLabel("Device:"))
@@ -25,13 +21,16 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.connect_btn = QtWidgets.QPushButton("Connect")
         top_layout.addWidget(self.connect_btn)
+
+        self.pause_btn = QtWidgets.QPushButton("Pause")
+        top_layout.addWidget(self.pause_btn)
         main_layout.addLayout(top_layout)
 
         # --- Plot Widget ---
         self.plot_widget = SerialPlotWidget(channels=["A6", "A7"], max_points=1000)
         main_layout.addWidget(self.plot_widget)
 
-        # --- Bottom Controls: Recording / Load ---
+        # --- Bottom Controls ---
         bottom_layout = QtWidgets.QHBoxLayout()
         self.record_btn = QtWidgets.QPushButton("Start Recording")
         self.load_btn = QtWidgets.QPushButton("Load CSV")
@@ -43,17 +42,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.connect_btn.clicked.connect(self.connect_device)
         self.record_btn.clicked.connect(self.toggle_recording)
         self.load_btn.clicked.connect(self.load_csv)
+        self.pause_btn.clicked.connect(self.toggle_pause)
 
         self.recording = False
-
-        # --- Restore last COM and baud from QSettings ---
-        last_port = self.settings.value("last_port", "")
-        last_baud = self.settings.value("last_baud", "9600")
-        if last_port:
-            index = self.com_selector.com_box.findText(last_port)
-            if index != -1:
-                self.com_selector.com_box.setCurrentIndex(index)
-        self.com_selector.baud_box.setCurrentText(str(last_baud))
+        self.paused = False
 
     def connect_device(self):
         port, baud = self.com_selector.get_selection()
@@ -61,11 +53,7 @@ class MainWindow(QtWidgets.QMainWindow):
             QtWidgets.QMessageBox.warning(self, "Error", "No COM port selected!")
             return
         success = self.plot_widget.connect_serial(port, baud)
-        if success:
-            # Save successful connection to QSettings
-            self.settings.setValue("last_port", port)
-            self.settings.setValue("last_baud", str(baud))
-        else:
+        if not success:
             QtWidgets.QMessageBox.critical(self, "Error", f"Failed to connect to {port}.")
 
     def toggle_recording(self):
@@ -83,6 +71,13 @@ class MainWindow(QtWidgets.QMainWindow):
         )
         if filename:
             self.plot_widget.load_csv(filename)
+
+    def toggle_pause(self):
+        self.plot_widget.toggle_pause()
+        if self.plot_widget.paused:
+            self.pause_btn.setText("Resume")
+        else:
+            self.pause_btn.setText("Pause")
 
 if __name__ == "__main__":
     import sys
