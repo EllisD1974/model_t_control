@@ -26,6 +26,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Build EXE with PyInstaller
+        working-directory: graphing_pyqt_tool
         run: |
           pyinstaller grapher.spec
           echo "Build complete"
@@ -35,8 +36,9 @@ jobs:
           choco install innosetup -y
 
       - name: Build Installer (ISCC)
+        working-directory: graphing_pyqt_tool
         run: |
-          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" bingo_client.iss
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" grapher.iss
 
       - name: Upload Installer Artifact
         uses: actions/upload-artifact@v4

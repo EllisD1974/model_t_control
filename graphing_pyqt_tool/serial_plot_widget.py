@@ -6,6 +6,7 @@ import threading
 import time
 import csv
 
+
 class SerialPlotWidget(QtWidgets.QWidget):
     def __init__(self, parent=None, channels=None, max_points=200):
         super().__init__(parent)
