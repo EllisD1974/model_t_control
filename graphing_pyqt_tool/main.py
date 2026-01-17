@@ -28,7 +28,7 @@ class MainWindow(QtWidgets.QMainWindow):
         main_layout.addLayout(top_layout)
 
         # --- Plot Widget ---
-        self.plot_widget = SerialPlotWidget(channels=["A6", "A7"])
+        self.plot_widget = SerialPlotWidget(channels=["A6", "A7"], max_points=1000)
         main_layout.addWidget(self.plot_widget)
 
         # --- Bottom Controls: Recording / Load ---
