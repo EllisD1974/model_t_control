@@ -2,6 +2,7 @@
 from PyQt5 import QtWidgets, QtCore
 import serial.tools.list_ports
 
+
 class ComSelectorWidget(QtWidgets.QWidget):
     def __init__(self, parent=None, default_baud=9600):
         super().__init__(parent)
