@@ -31,7 +31,7 @@ exe = EXE(
     a.binaries,
     a.zipfiles,
     a.datas,
-    name="Grapher",
+    name="GrapherClient",
     console=False,
     icon="resources/icons/icon.ico",
     debug=False,
