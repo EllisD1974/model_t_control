@@ -62,10 +62,17 @@ class SerialPlotWidget(QtWidgets.QWidget):
             return False
 
     def disconnect_serial(self):
+        """
+        Safely stop the serial reading thread and close the port.
+        """
         self.running = False
         if self.ser and self.ser.is_open:
-            self.ser.close()
-            self.ser = None
+            try:
+                self.ser.close()
+                print("Serial port closed.")
+            except Exception as e:
+                print("Error closing serial port:", e)
+        self.ser = None
 
     # --- Background Serial Reading ---
     def read_serial(self):
