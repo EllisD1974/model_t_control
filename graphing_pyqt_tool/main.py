@@ -1,12 +1,13 @@
-# main_app_with_pause.py
+# main_app_with_screenshot.py
 from PyQt5 import QtWidgets
+from pyqtgraph.exporters import ImageExporter
 from com_selector_widget import ComSelectorWidget
 from serial_plot_widget import SerialPlotWidget
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Serial Plot with Pause")
+        self.setWindowTitle("Serial Plot with Screenshot")
         self.resize(800, 600)
 
         central = QtWidgets.QWidget()
@@ -34,8 +35,10 @@ class MainWindow(QtWidgets.QMainWindow):
         bottom_layout = QtWidgets.QHBoxLayout()
         self.record_btn = QtWidgets.QPushButton("Start Recording")
         self.load_btn = QtWidgets.QPushButton("Load CSV")
+        self.screenshot_btn = QtWidgets.QPushButton("Save Screenshot")
         bottom_layout.addWidget(self.record_btn)
         bottom_layout.addWidget(self.load_btn)
+        bottom_layout.addWidget(self.screenshot_btn)
         main_layout.addLayout(bottom_layout)
 
         # --- Signals ---
@@ -43,9 +46,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.record_btn.clicked.connect(self.toggle_recording)
         self.load_btn.clicked.connect(self.load_csv)
         self.pause_btn.clicked.connect(self.toggle_pause)
+        self.screenshot_btn.clicked.connect(self.save_screenshot)
 
         self.recording = False
-        self.paused = False
 
     def connect_device(self):
         port, baud = self.com_selector.get_selection()
@@ -78,6 +81,19 @@ class MainWindow(QtWidgets.QMainWindow):
             self.pause_btn.setText("Resume")
         else:
             self.pause_btn.setText("Pause")
+
+    def save_screenshot(self):
+        # Open file dialog
+        filename, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self, "Save Screenshot", "", "PNG Files (*.png);;JPEG Files (*.jpg)"
+        )
+        if filename:
+            try:
+                exporter = ImageExporter(self.plot_widget.plot_widget.plotItem)
+                exporter.export(filename)
+                QtWidgets.QMessageBox.information(self, "Saved", f"Screenshot saved to {filename}")
+            except Exception as e:
+                QtWidgets.QMessageBox.critical(self, "Error", f"Failed to save screenshot:\n{e}")
 
 if __name__ == "__main__":
     import sys
