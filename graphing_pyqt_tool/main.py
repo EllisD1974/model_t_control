@@ -2,6 +2,7 @@ from PyQt5 import QtWidgets, QtCore
 from com_selector_widget import ComSelectorWidget
 from serial_plot_widget import SerialPlotWidget
 
+
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
