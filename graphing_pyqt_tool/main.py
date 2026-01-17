@@ -1,13 +1,22 @@
+from pathlib import Path
 from PyQt5 import QtWidgets, QtCore
+from PyQt5.QtGui import QIcon
 from pyqtgraph.exporters import ImageExporter
 from com_selector_widget import ComSelectorWidget
 from serial_plot_widget import SerialPlotWidget
+
+
+def resource_path(relative_path):
+    base_path = Path(getattr(sys, "_MEIPASS", Path(__file__).parent))
+    return base_path / relative_path
+
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Serial Plot with Toggle Connect")
         self.resize(800, 600)
+        self.setWindowIcon(QIcon(str(resource_path("resources/icons/icon.ico"))))
 
         self.settings = QtCore.QSettings("NEL", "SerialPlotApp")
 
