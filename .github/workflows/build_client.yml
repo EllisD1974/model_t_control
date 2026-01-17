@@ -43,6 +43,5 @@ jobs:
       - name: Upload Installer Artifact
         uses: actions/upload-artifact@v4
         with:
-          working-directory: graphing_pyqt_tool
           name: installer
-          path: installer_output/*.exe
+          path: graphing_pyqt_tool/installer_output/*.exe
