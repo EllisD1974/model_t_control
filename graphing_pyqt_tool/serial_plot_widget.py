@@ -8,6 +8,8 @@ import csv
 
 
 class SerialPlotWidget(QtWidgets.QWidget):
+    connection_lost = QtCore.pyqtSignal(str)  # reason message
+
     def __init__(self, parent=None, channels=None, max_points=200):
         super().__init__(parent)
 
@@ -95,8 +97,18 @@ class SerialPlotWidget(QtWidgets.QWidget):
                     if self.recording and self.csv_writer:
                         self.csv_writer.writerow(values)
 
+            except (serial.SerialException, OSError) as e:
+                # 🔴 Connection lost
+                self.running = False
+                self.ser = None
+                self.connection_lost.emit(str(e))
+
             except Exception as e:
-                print("Read error:", e)
+                # Catch-all safety
+                self.running = False
+                self.ser = None
+                self.connection_lost.emit(f"Unexpected error: {e}")
+
             time.sleep(0.005)
 
     # --- Start/Stop Recording ---

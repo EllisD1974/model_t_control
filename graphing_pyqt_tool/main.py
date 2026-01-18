@@ -6,6 +6,7 @@ from com_selector_widget import ComSelectorWidget
 from serial_plot_widget import SerialPlotWidget
 
 
+# TODO: Have to adjust this to work with the file structure - i.e. when running frozen we need the graphing_pyqt_tool/ included
 def resource_path(relative_path):
     base_path = Path(getattr(sys, "_MEIPASS", Path(__file__).parent))
     return base_path / relative_path
@@ -70,6 +71,21 @@ class MainWindow(QtWidgets.QMainWindow):
             if index != -1:
                 self.com_selector.com_box.setCurrentIndex(index)
         self.com_selector.baud_box.setCurrentText(str(last_baud))
+
+        self.plot_widget.connection_lost.connect(self.on_connection_lost)
+
+    def on_connection_lost(self, reason):
+        if not self.connected:
+            return  # already handled
+
+        self.connected = False
+        self.connect_btn.setText("Connect")
+
+        QtWidgets.QMessageBox.warning(
+            self,
+            "Connection Lost",
+            f"Serial connection lost:\n{reason}"
+        )
 
     # --- Connect/Disconnect Toggle ---
     def toggle_connection(self):
